@@ -1,0 +1,75 @@
+{% extends 'planner/base.html' %}
+
+{% block title %}Главная - SeriesPlanner{% endblock %}
+
+{% block content %}
+<div class="bg-primary text-white rounded p-5 mb-5">
+    <div class="text-center">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="bi bi-film"></i> Планируй просмотр сериалов умно!
+        </h1>
+        <p class="lead mb-4">
+            Узнай, за сколько дней ты закончишь сериал. Получай персональные рекомендации по эпизодам.
+        </p>
+        <a href="{% url 'series_list' %}" class="btn btn-light btn-lg">
+            Перейти к каталогу <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-4 text-center mb-3">
+        <div class="feature-icon bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center fs-2 mb-3" style="width: 80px; height: 80px;">
+            <i class="bi bi-calculator"></i>
+        </div>
+        <h4>Автоматический расчет</h4>
+        <p class="text-muted">Система рассчитает, за сколько дней вы закончите сериал при вашем темпе просмотра</p>
+    </div>
+    <div class="col-md-4 text-center mb-3">
+        <div class="feature-icon bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center fs-2 mb-3" style="width: 80px; height: 80px;">
+            <i class="bi bi-list-check"></i>
+        </div>
+        <h4>Подбор эпизодов</h4>
+        <p class="text-muted">Получайте рекомендации, какие эпизоды смотреть сегодня, учитывая ваше доступное время</p>
+    </div>
+    <div class="col-md-4 text-center mb-3">
+        <div class="feature-icon bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center fs-2 mb-3" style="width: 80px; height: 80px;">
+            <i class="bi bi-graph-up"></i>
+        </div>
+        <h4>Отслеживание прогресса</h4>
+        <p class="text-muted">Следите за своим прогрессом и историей просмотра с красивыми графиками</p>
+    </div>
+</div>
+
+<h2 class="mb-4">Популярные сериалы</h2>
+<div class="row">
+    {% for series in recent_series %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            {% if series.poster_url %}
+            <img src="{{ series.poster_url }}" class="card-img-top" alt="{{ series.title }}" style="height: 300px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center text-white" style="height: 300px;">
+                <i class="bi bi-film" style="font-size: 4rem;"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ series.title }}</h5>
+                <p class="card-text text-muted small">
+                    {{ series.total_episodes }} эпизодов • ~{{ series.get_total_duration_hours }} часов
+                </p>
+                <a href="{% url 'series_detail' series.id %}" class="btn btn-primary btn-sm">
+                    Подробнее <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Сериалы пока не добавлены. Зайдите в админ-панель, чтобы добавить их!
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

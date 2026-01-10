@@ -1,0 +1,111 @@
+{% extends 'planner/base.html' %}
+
+{% block title %}Мой список - SeriesPlanner{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="bi bi-bookmark-star"></i> Мой список просмотра
+</h1>
+
+{% if watching %}
+<h3 class="mt-4 mb-3">
+    <i class="bi bi-play-circle text-success"></i> Сейчас смотрю ({{ watching|length }})
+</h3>
+{% for plan in watching %}
+<div class="card mb-3 shadow-sm">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="card-title mb-2">{{ plan.series.title }}</h4>
+                
+                <div class="progress mb-2" style="height: 25px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ plan.get_progress_percentage }}%;" 
+                         aria-valuenow="{{ plan.get_progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                        {{ plan.get_progress_percentage }}%
+                    </div>
+                </div>
+                
+                <p class="text-muted mb-2">
+                    <i class="bi bi-geo-alt-fill text-primary"></i> Вы на: 
+                    <strong>S{{ plan.last_season_watched|stringformat:"02d" }}E{{ plan.last_episode_watched|stringformat:"02d" }}</strong>
+                    ({{ plan.calculate_remaining_episodes }} эпизодов осталось)
+                </p>
+                
+                <p class="text-muted mb-2">
+                    <i class="bi bi-clock text-primary"></i> Осталось: 
+                    <strong>~{{ plan.calculate_completion_days }} дней</strong> при {{ plan.daily_hours_available }} ч/день
+                </p>
+                
+                <p class="text-muted mb-0">
+                    <i class="bi bi-calendar-check text-primary"></i> Планируемая дата завершения: 
+                    <strong>{{ plan.estimated_completion_date|date:"d.m.Y" }}</strong>
+                </p>
+            </div>
+            
+            <div class="col-md-4 text-end">
+                <a href="{% url 'series_detail' plan.series.id %}" class="btn btn-outline-primary btn-sm mb-2 w-100">
+                    <i class="bi bi-eye"></i> Подробнее
+                </a>
+                <a href="{% url 'update_plan' plan.id %}" class="btn btn-outline-secondary btn-sm mb-2 w-100">
+                    <i class="bi bi-pencil"></i> Редактировать
+                </a>
+                <a href="{% url 'delete_plan' plan.id %}" class="btn btn-outline-danger btn-sm w-100">
+                    <i class="bi bi-trash"></i> Удалить
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if planning %}
+<h3 class="mt-5 mb-3">
+    <i class="bi bi-bookmark text-info"></i> В планах ({{ planning|length }})
+</h3>
+<div class="row">
+    {% for plan in planning %}
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ plan.series.title }}</h5>
+                <p class="text-muted small">{{ plan.series.total_episodes }} эпизодов • ~{{ plan.series.get_total_duration_hours }} часов</p>
+                <a href="{% url 'update_plan' plan.id %}" class="btn btn-sm btn-primary">Начать просмотр</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if completed %}
+<h3 class="mt-5 mb-3">
+    <i class="bi bi-check-circle text-success"></i> Завершено ({{ completed|length }})
+</h3>
+<div class="row">
+    {% for plan in completed %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ plan.series.title }}</h5>
+                <p class="text-success"><i class="bi bi-check-circle-fill"></i> Просмотрено полностью</p>
+                <small class="text-muted">Завершено: {{ plan.updated_at|date:"d.m.Y" }}</small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if not watching and not completed and not planning and not paused %}
+<div class="alert alert-info text-center py-5">
+    <i class="bi bi-inbox" style="font-size: 4rem;"></i>
+    <h4 class="mt-3">Ваш список пуст</h4>
+    <p class="text-muted">Добавьте сериалы из каталога, чтобы начать планирование!</p>
+    <a href="{% url 'series_list' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Перейти в каталог
+    </a>
+</div>
+{% endif %}
+{% endblock %}

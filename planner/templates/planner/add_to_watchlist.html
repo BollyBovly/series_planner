@@ -1,0 +1,11 @@
+{% extends 'planner/base.html' %}
+
+{% block content %}
+<h2>Добавить "{{ series.title }}" в список</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Добавить</button>
+    <a href="{% url 'series_detail' series.id %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

@@ -50,9 +50,32 @@
                 <a href="{% url 'update_plan' plan.id %}" class="btn btn-outline-secondary btn-sm mb-2 w-100">
                     <i class="bi bi-pencil"></i> Редактировать
                 </a>
-                <a href="{% url 'delete_plan' plan.id %}" class="btn btn-outline-danger btn-sm w-100">
+                <a href="{% url 'delete_plan' plan.id %}" class="btn btn-outline-danger btn-sm mb-2 w-100">
                     <i class="bi bi-trash"></i> Удалить
                 </a>
+
+                <form method="post" action="{% url 'add_watching_session' plan.id %}" class="mt-2">
+                    {% csrf_token %}
+                    <div class="input-group input-group-sm">
+                        <input 
+                            type="number" 
+                            name="episodes" 
+                            class="form-control" 
+                            min="1" 
+                            max="{{ plan.calculate_remaining_episodes }}" 
+                            step="1"
+                            placeholder="2" 
+                            inputmode="numeric"
+                            required
+                        >
+                        <button class="btn btn-success" type="submit">
+                            <i class="bi bi-check2-circle"></i>
+                        </button>
+                    </div>
+                    <div class="form-text text-start">
+                        Сколько эпизодов посмотрели сегодня (осталось {{ plan.calculate_remaining_episodes }})
+                    </div>
+                </form>
             </div>
         </div>
     </div>

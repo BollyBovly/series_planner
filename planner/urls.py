@@ -10,4 +10,5 @@ urlpatterns = [
     path('update-plan/<int:plan_id>/', views.update_viewing_plan, name='update_plan'),
     path('delete-plan/<int:plan_id>/', views.delete_viewing_plan, name='delete_plan'),
     path('analytics/', views.analytics, name='analytics'),
+    path('watch-session/<int:plan_id>/', views.add_watching_session, name='add_watching_session'),
 ]

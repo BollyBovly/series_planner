@@ -225,7 +225,9 @@ class WatchingHistory(models.Model):
         Episode,
         on_delete=models.CASCADE,
         related_name='watch_records',
-        verbose_name="Эпизод"
+        verbose_name="Эпизод",
+        blank=True,
+        null=True
     )
     series = models.ForeignKey(
         Series,

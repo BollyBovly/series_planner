@@ -6,14 +6,14 @@ from datetime import date, timedelta
 from .models import Series, Episode, UserViewingPlan, WatchingHistory
 from .forms import ViewingPlanForm, TimeCalculatorForm
 import os
+from django.views.decorators.http import require_POST
+from django.db.models import F
 from django.conf import settings
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg') 
 from django.db import models
 import matplotlib.pyplot as plt
-
-
 
 def home(request):
     recent_series = Series.objects.all()[:6]
@@ -26,7 +26,6 @@ def home(request):
 def series_list(request):
     series_queryset = Series.objects.all()
     
-    # Поиск
     search_query = request.GET.get('search', '')
     if search_query:
         series_queryset = series_queryset.filter(
@@ -172,7 +171,6 @@ def delete_viewing_plan(request, plan_id):
 
 @login_required
 def analytics(request):
-    """Страница с аналитикой просмотра (Pandas + Matplotlib)."""
     history_qs = WatchingHistory.objects.filter(user=request.user).select_related('series')
 
     total_minutes = history_qs.aggregate(total=models.Sum('duration_watched'))['total'] or 0
@@ -235,3 +233,48 @@ def analytics(request):
     }
     return render(request, 'planner/analytics.html', context)
 
+@login_required
+@require_POST
+def add_watching_session(request, plan_id):
+    plan = get_object_or_404(UserViewingPlan, id=plan_id, user=request.user)
+
+    episodes_str = request.POST.get('episodes')
+    if not episodes_str:
+        messages.error(request, 'Укажите, сколько эпизодов вы посмотрели.')
+        return redirect('my_watchlist')
+
+    try:
+        episodes_count = int(episodes_str)
+    except ValueError:
+        messages.error(request, 'Нужно ввести целое число эпизодов.')
+        return redirect('my_watchlist')
+
+    if episodes_count <= 0:
+        messages.error(request, 'Количество эпизодов должно быть больше нуля.')
+        return redirect('my_watchlist')
+
+    old_episode = plan.last_episode_watched
+    new_episode = old_episode + episodes_count
+
+    if new_episode >= plan.series.total_episodes:
+        new_episode = plan.series.total_episodes
+        plan.status = 'completed'
+    plan.last_episode_watched = new_episode
+    plan.save()
+
+    avg_duration = plan.series.average_episode_duration or 45
+    total_minutes = episodes_count * avg_duration
+
+    WatchingHistory.objects.create(
+        user=request.user,
+        series=plan.series,
+        episode=None,
+        duration_watched=total_minutes,
+    )
+
+    messages.success(
+        request,
+        f'Добавлено {episodes_count} эпизодов ({total_minutes} мин) для "{plan.series.title}". '
+        f'Прогресс: {old_episode} → {new_episode}/{plan.series.total_episodes}'
+    )
+    return redirect('my_watchlist')

@@ -9,4 +9,5 @@ urlpatterns = [
     path('add-to-watchlist/<int:series_id>/', views.add_to_watchlist, name='add_to_watchlist'),
     path('update-plan/<int:plan_id>/', views.update_viewing_plan, name='update_plan'),
     path('delete-plan/<int:plan_id>/', views.delete_viewing_plan, name='delete_plan'),
+    path('analytics/', views.analytics, name='analytics'),
 ]

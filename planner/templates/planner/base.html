@@ -34,6 +34,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'my_watchlist' %}">Мой список</a>
                     </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'analytics' %}">Аналитика</a>
+                    </li>
+                    {% endif %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> {{ user.username }}

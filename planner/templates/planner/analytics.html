@@ -1,0 +1,79 @@
+{% extends 'planner/base.html' %}
+
+{% block title %}Аналитика просмотра - SeriesPlanner{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="bi bi-graph-up"></i> Моя статистика просмотра
+</h1>
+
+{% if total_entries == 0 %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i>
+    У вас пока нет записей в истории просмотра. Начните смотреть сериалы и отмечать прогресс!
+</div>
+{% else %}
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Всего часов просмотра</h5>
+                <p class="display-6 mb-0">{{ total_hours }}</p>
+                <p class="text-muted mb-0">часов по всем сериалам</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Количество сессий</h5>
+                <p class="display-6 mb-0">{{ total_entries }}</p>
+                <p class="text-muted mb-0">записей в истории просмотра</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-4 mb-3">
+    <i class="bi bi-bar-chart-line"></i> Часы просмотра по дням
+</h3>
+
+{% if chart_url %}
+<div class="card mb-4 shadow-sm">
+    <div class="card-body text-center">
+        <img src="{{ chart_url }}" alt="График часов по дням" class="img-fluid">
+    </div>
+</div>
+{% else %}
+<div class="alert alert-warning">
+    Недостаточно данных для построения графика.
+</div>
+{% endif %}
+
+<h3 class="mt-4 mb-3">
+    <i class="bi bi-trophy"></i> Топ-3 сериала по времени просмотра
+</h3>
+
+{% if per_series %}
+<div class="row">
+    {% for row in per_series %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ row.series }}</h5>
+                <p class="display-6 mb-0">{{ row.hours|floatformat:1 }}</p>
+                <p class="text-muted mb-0">часов просмотра</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    Топ сериалов пока не сформирован.
+</div>
+{% endif %}
+
+{% endif %}
+{% endblock %}

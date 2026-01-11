@@ -5,6 +5,14 @@ from django.db.models import Q, Count
 from datetime import date, timedelta
 from .models import Series, Episode, UserViewingPlan, WatchingHistory
 from .forms import ViewingPlanForm, TimeCalculatorForm
+import os
+from django.conf import settings
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg') 
+from django.db import models
+import matplotlib.pyplot as plt
+
 
 
 def home(request):
@@ -161,3 +169,69 @@ def delete_viewing_plan(request, plan_id):
         'plan': plan,
     }
     return render(request, 'planner/delete_plan.html', context)
+
+@login_required
+def analytics(request):
+    """Страница с аналитикой просмотра (Pandas + Matplotlib)."""
+    history_qs = WatchingHistory.objects.filter(user=request.user).select_related('series')
+
+    total_minutes = history_qs.aggregate(total=models.Sum('duration_watched'))['total'] or 0
+    total_hours = round(total_minutes / 60, 1)
+
+    chart_url = None
+    per_day = []
+    per_series = []
+
+    if history_qs.exists():
+        data = []
+        for item in history_qs:
+            data.append({
+                'date': item.watched_at.date(),
+                'minutes': item.duration_watched,
+                'series': item.series.title,
+            })
+        df = pd.DataFrame(data)
+
+        per_day_df = (
+            df.groupby('date')['minutes']
+            .sum()
+            .reset_index()
+        )
+        per_day_df['hours'] = per_day_df['minutes'] / 60.0
+        per_day = per_day_df.to_dict(orient='records')
+
+        per_series_df = (
+            df.groupby('series')['minutes']
+            .sum()
+            .reset_index()
+            .sort_values('minutes', ascending=False)
+        )
+        per_series_df['hours'] = per_series_df['minutes'] / 60.0
+        per_series = per_series_df.head(3).to_dict(orient='records')
+
+        plt.figure(figsize=(8, 4))
+        plt.plot(per_day_df['date'], per_day_df['hours'], marker='o')
+        plt.title('Часы просмотра по дням')
+        plt.xlabel('Дата')
+        plt.ylabel('Часы')
+        plt.grid(True)
+        plt.tight_layout()
+
+        charts_dir = os.path.join(settings.MEDIA_ROOT, 'charts')
+        os.makedirs(charts_dir, exist_ok=True)
+
+        chart_path = os.path.join(charts_dir, f'user_{request.user.id}_daily_hours.png')
+        plt.savefig(chart_path)
+        plt.close()
+
+        chart_url = settings.MEDIA_URL + f'charts/user_{request.user.id}_daily_hours.png'
+
+    context = {
+        'total_hours': total_hours,
+        'total_entries': history_qs.count(),
+        'per_day': per_day,
+        'per_series': per_series,
+        'chart_url': chart_url,
+    }
+    return render(request, 'planner/analytics.html', context)
+

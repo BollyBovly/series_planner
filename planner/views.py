@@ -21,9 +21,7 @@ def home(request):
     context = {
         'message': 'Добро пожаловать!',
     }
-    return render(request, 'home.html', context)
-
-
+    return render(request, 'planner/home.html', context)
 
 
 def series_list(request):

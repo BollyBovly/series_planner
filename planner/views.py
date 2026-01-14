@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Count
 from datetime import date, timedelta
+
+from matplotlib.style import context
 from .models import Series, Episode, UserViewingPlan, WatchingHistory
 from .forms import ViewingPlanForm, TimeCalculatorForm
 import os
@@ -16,11 +18,12 @@ from django.db import models
 import matplotlib.pyplot as plt
 
 def home(request):
-    recent_series = Series.objects.all()[:6]
     context = {
-        'recent_series': recent_series,
+        'message': 'Добро пожаловать!',
     }
-    return render(request, 'planner/home.html', context)
+    return render(request, 'home.html', context)
+
+
 
 
 def series_list(request):

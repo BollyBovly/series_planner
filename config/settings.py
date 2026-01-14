@@ -38,10 +38,9 @@ ALLOWED_HOSTS = [
 
 
 AUTHENTICATION_BACKENDS = [
-    'planner.backend.EmailOrUsernameBackend',
-    'django.contrib.auth.backend.ModelBackend',
+    'planner.backends.EmailOrUsernameBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
-
 
 # Application definition
 

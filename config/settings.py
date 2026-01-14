@@ -82,7 +82,8 @@ TEMPLATES = [
     },
 ]
 
-
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 WSGI_APPLICATION = 'config.wsgi.application'
 

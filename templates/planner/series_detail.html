@@ -76,9 +76,8 @@
         </h3>
         <form method="get" class="row g-3">
             <div class="col-md-6">
-                <label for="id_daily_hours" class="form-label">Сколько часов в день вы можете смотреть?</label>
-                {{ calculator_form.daily_hours }}
-                <div class="form-text">{{ calculator_form.daily_hours.help_text }}</div>
+                <label for="id_episodes_per_day" class="form-label">Сколько эпизодов в день вы можете смотреть?</label>
+                {{ calculator_form.episodes_per_day }}
             </div>
             <div class="col-md-6 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary">
@@ -91,7 +90,7 @@
         <div class="alert alert-success mt-3">
             <h5><i class="bi bi-check-circle"></i> Результат:</h5>
             <p class="mb-0 fs-5">
-                При просмотре по <strong>{{ calculation_result.daily_hours }}</strong> часов в день, 
+                При просмотре по <strong>{{ calculation_result.episodes_per_day }}</strong> эпизодов в день, 
                 вы закончите сериал за <strong>~{{ calculation_result.days_needed }}</strong> дней.
             </p>
             <p class="mb-0 text-muted">

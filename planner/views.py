@@ -67,16 +67,17 @@ def series_detail(request, series_id):
     calculation_result = None
     
     if calculator_form.is_valid():
-        daily_hours = calculator_form.cleaned_data['daily_hours']
-        total_hours = series.get_total_duration_hours()
-        days_needed = round(total_hours / float(daily_hours))
+        episodes_per_day = calculator_form.cleaned_data['episodes_per_day']
+        total_episodes = series.total_episodes
+        days_needed = round(total_episodes / float(episodes_per_day))
         finish_date = date.today() + timedelta(days=days_needed)
         
         calculation_result = {
             'days_needed': days_needed,
             'finish_date': finish_date,
-            'daily_hours': daily_hours,
+            'episodes_per_day': episodes_per_day,
         }
+
     
     user_has_plan = False
     if request.user.is_authenticated:

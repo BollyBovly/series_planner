@@ -33,15 +33,13 @@ class ViewingPlanForm(forms.ModelForm):
 
 
 class TimeCalculatorForm(forms.Form):
-    daily_hours = forms.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        validators=[MinValueValidator(0.1), MaxValueValidator(24.0)],
-        initial=2.0,
+    episodes_per_day = forms.IntegerField(
+        label='Сколько эпизодов в день вы можете смотреть?',
+        min_value=1,
+        max_value=50,
+        initial=2,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
-            'step': '0.5',
-            'min': '0.1',
-            'max': '24',
-        }),
+            'placeholder': 'Например: 2'
+        })
     )

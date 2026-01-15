@@ -38,6 +38,16 @@ class Series(models.Model):
         blank=True,
         verbose_name="TMDB ID"
     )
+    rating = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="Рейтинг TMDB"
+    )
+    release_year = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Год выхода"
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Дата добавления"
@@ -116,6 +126,7 @@ class UserViewingPlan(models.Model):
         ('completed', 'Завершено'),
         ('paused', 'На паузе'),
         ('planning', 'В планах'),
+        ('dropped', 'Брошено'),
     ]
 
     user = models.ForeignKey(
@@ -206,6 +217,9 @@ class UserViewingPlan(models.Model):
             return 0
         watched = self.series.total_episodes - self.calculate_remaining_episodes()
         return round((watched / self.series.total_episodes) * 100)
+    
+    def get_episodes_watched(self):
+        return self.series.total_episodes - self.calculate_remaining_episodes()
 
     def save(self, *args, **kwargs):
         if self.daily_hours_available > 0:
@@ -251,4 +265,40 @@ class WatchingHistory(models.Model):
         ordering = ['-watched_at']
 
     def __str__(self):
-        return f"{self.user.username} - {self.episode.get_episode_code()} - {self.watched_at.strftime('%Y-%m-%d')}"
+        ep_code = self.episode.get_episode_code() if self.episode else "N/A"
+        return f"{self.user.username} - {ep_code} - {self.watched_at.strftime('%Y-%m-%d')}"
+
+
+class UserSeriesRating(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='series_ratings',
+        verbose_name="Пользователь"
+    )
+    series = models.ForeignKey(
+        Series,
+        on_delete=models.CASCADE,
+        related_name='user_ratings',
+        verbose_name="Сериал"
+    )
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        verbose_name="Оценка (1-10)"
+    )
+    review = models.TextField(
+        blank=True,
+        verbose_name="Отзыв"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата оценки"
+    )
+    
+    class Meta:
+        verbose_name = "Оценка пользователя"
+        verbose_name_plural = "Оценки пользователей"
+        unique_together = ['user', 'series']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.series.title}: {self.rating}/10"

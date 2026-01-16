@@ -56,3 +56,9 @@ def profile(request):
     }
     
     return render(request, 'accounts/profile.html', context)
+
+def logout_view(request):
+    from django.contrib.auth import logout
+    logout(request)
+    return redirect('home')
+

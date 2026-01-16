@@ -245,3 +245,38 @@ def search_series(request):
         'results': results,
     }
     return render(request, 'planner/search.html', context)
+
+@login_required
+def quick_update(request, plan_id):
+    plan = get_object_or_404(UserViewingPlan, id=plan_id, user=request.user)
+    
+    if request.method == 'POST':
+        episodes_watched = int(request.POST.get('episodes_watched', 1))
+        
+        current_watched = plan.get_episodes_watched()
+        new_total = current_watched + episodes_watched
+        
+        if plan.series.total_seasons > 0:
+            episodes_per_season = plan.series.total_episodes / plan.series.total_seasons
+            
+            new_season = int(new_total / episodes_per_season) + 1
+            new_episode = int(new_total % episodes_per_season)
+            
+            if new_season > plan.series.total_seasons:
+                new_season = plan.series.total_seasons
+                new_episode = int(episodes_per_season)
+                plan.status = 'completed'
+            
+            plan.last_season_watched = new_season
+            plan.last_episode_watched = new_episode
+        else:
+            plan.last_episode_watched = min(new_total, plan.series.total_episodes)
+            
+            if plan.last_episode_watched >= plan.series.total_episodes:
+                plan.status = 'completed'
+        
+        plan.save()
+        
+        messages.success(request, f'Добавлено {episodes_watched} эпизодов! Теперь: S{plan.last_season_watched}E{plan.last_episode_watched}')
+    
+    return redirect('series_list')

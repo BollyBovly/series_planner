@@ -151,18 +151,31 @@ class UserViewingPlan(models.Model):
         return f"{self.user.username} - {self.series.title} ({self.get_status_display()})"
     
     def get_episodes_watched(self):
-        episodes = Episode.objects.filter(
-            series=self.series,
-            season_number__lt=self.last_season_watched
-        ).count()
+        has_episodes = Episode.objects.filter(series=self.series).exists()
         
-        episodes += Episode.objects.filter(
-            series=self.series,
-            season_number=self.last_season_watched,
-            episode_number__lte=self.last_episode_watched
-        ).count()
-        
-        return episodes
+        if has_episodes:
+            episodes = Episode.objects.filter(
+                series=self.series,
+                season_number__lt=self.last_season_watched
+            ).count()
+            
+            episodes += Episode.objects.filter(
+                series=self.series,
+                season_number=self.last_season_watched,
+                episode_number__lte=self.last_episode_watched
+            ).count()
+            
+            return episodes
+        else:
+            if self.series.total_seasons > 0 and self.last_season_watched > 0:
+                episodes_per_season = self.series.total_episodes / self.series.total_seasons
+                
+                watched = (self.last_season_watched - 1) * episodes_per_season
+                watched += self.last_episode_watched
+                return int(watched)
+            else:
+                return self.last_episode_watched if self.last_episode_watched > 0 else 0
+
     
     def calculate_remaining_episodes(self):
         watched = self.get_episodes_watched()

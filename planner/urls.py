@@ -8,6 +8,7 @@ urlpatterns = [
     path('add/<int:series_id>/', views.add_to_list, name='add_to_list'),
     path('remove/<int:plan_id>/', views.remove_from_list, name='remove_from_list'),
     path('update/<int:plan_id>/', views.update_progress, name='update_progress'),
+    path('quick-update/<int:plan_id>/', views.quick_update, name='quick_update'),
     path('watch/<int:plan_id>/<int:season>/<int:episode>/', views.mark_episode_watched, name='mark_episode_watched'),
     path('rate/<int:series_id>/', views.rate_series, name='rate_series'),
     path('statistics/', views.statistics, name='statistics'),

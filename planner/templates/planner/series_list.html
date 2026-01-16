@@ -90,6 +90,25 @@
                     <i class="bi bi-calendar-check"></i> Завершение: {{ plan.estimated_completion_date|date:"d.m.Y" }}
                 </p>
                 
+                <!-- Быстрое добавление эпизодов -->
+                <form method="post" action="{% url 'quick_update' plan.id %}" class="mb-2">
+                    {% csrf_token %}
+                    <div class="input-group input-group-sm">
+                        <button type="button" class="btn btn-outline-secondary" onclick="this.nextElementSibling.stepDown()">
+                            <i class="bi bi-dash"></i>
+                        </button>
+                        <input type="number" name="episodes_watched" class="form-control text-center" 
+                               value="1" min="1" max="10" style="max-width: 60px;">
+                        <button type="button" class="btn btn-outline-secondary" onclick="this.previousElementSibling.stepUp()">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Добавить
+                        </button>
+                    </div>
+                    <small class="text-muted">Сколько серий посмотрели?</small>
+                </form>
+                
                 <div class="d-flex gap-2">
                     <a href="{% url 'series_detail' plan.series.id %}" class="btn btn-primary btn-sm flex-fill">
                         <i class="bi bi-eye"></i> Открыть

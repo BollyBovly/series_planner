@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль - SeriesPlanner{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4">
+            <i class="bi bi-person-circle"></i> Профиль: {{ user.username }}
+        </h1>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body text-center">
+                <h2>{{ stats.total_series }}</h2>
+                <p class="mb-0">Всего сериалов</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body text-center">
+                <h2>{{ stats.watching }}</h2>
+                <p class="mb-0">Смотрю</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body text-center">
+                <h2>{{ stats.completed }}</h2>
+                <p class="mb-0">Завершено</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body text-center">
+                <h2>{{ stats.total_hours }}</h2>
+                <p class="mb-0">Часов просмотрено</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h3>Мои сериалы</h3>
+        <a href="{% url 'series_list' %}" class="btn btn-primary mb-3">
+            <i class="bi bi-list"></i> Открыть полный список
+        </a>
+    </div>
+</div>
+{% endblock %}
+

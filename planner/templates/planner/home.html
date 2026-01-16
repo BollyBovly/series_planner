@@ -1,4 +1,4 @@
-{% extends 'planner/base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Главная - SeriesPlanner{% endblock %}
 
@@ -43,7 +43,7 @@
 
 <h2 class="mb-4">Популярные сериалы</h2>
 <div class="row">
-    {% for series in recent_series %}
+    {% for series in series_list %}
     <div class="col-md-4 mb-4">
         <div class="card h-100 shadow-sm">
             {% if series.poster_url %}

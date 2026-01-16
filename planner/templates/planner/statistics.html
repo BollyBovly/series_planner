@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Статистика - SeriesPlanner{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4">
+            <i class="bi bi-graph-up"></i> Моя статистика
+        </h1>
+    </div>
+</div>
+
+<!-- Основная статистика -->
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>{{ stats.total_series }}</h3>
+                <small class="text-muted">Всего сериалов</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-success text-white">
+            <div class="card-body">
+                <h3>{{ stats.watching }}</h3>
+                <small>Смотрю</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-info text-white">
+            <div class="card-body">
+                <h3>{{ stats.completed }}</h3>
+                <small>Завершено</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-warning text-dark">
+            <div class="card-body">
+                <h3>{{ stats.paused }}</h3>
+                <small>На паузе</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-secondary text-white">
+            <div class="card-body">
+                <h3>{{ stats.planning }}</h3>
+                <small>В планах</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-danger text-white">
+            <div class="card-body">
+                <h3>{{ stats.dropped }}</h3>
+                <small>Брошено</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Время и эпизоды -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h4><i class="bi bi-clock"></i> Всего просмотрено</h4>
+                <h2>{{ stats.total_hours }} часов</h2>
+                <p class="text-muted">{{ stats.total_episodes }} эпизодов</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h4><i class="bi bi-tags"></i> Любимые жанры</h4>
+                {% for genre, count in favorite_genres %}
+                <span class="badge bg-primary me-2">{{ genre }} ({{ count }})</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- История просмотров -->
+<div class="row">
+    <div class="col-12">
+        <h3>Последние просмотры</h3>
+        <div class="card">
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Сериал</th>
+                            <th>Эпизод</th>
+                            <th>Время</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for history in recent_history %}
+                        <tr>
+                            <td>{{ history.watched_at|date:"d.m.Y H:i" }}</td>
+                            <td>{{ history.series.title }}</td>
+                            <td>{% if history.episode %}{{ history.episode.get_episode_code }}{% else %}N/A{% endif %}</td>
+                            <td>{{ history.duration_watched }} мин</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">История просмотров пуста</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

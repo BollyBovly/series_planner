@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои сериалы - SeriesPlanner{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4">
+            <i class="bi bi-list-ul"></i> Мои сериалы
+        </h1>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="btn-group" role="group">
+            <a href="?status=all" class="btn btn-outline-primary {% if status_filter == 'all' %}active{% endif %}">
+                <i class="bi bi-collection"></i> Все
+            </a>
+            <a href="?status=watching" class="btn btn-outline-success {% if status_filter == 'watching' %}active{% endif %}">
+                <i class="bi bi-play-circle"></i> Смотрю
+            </a>
+            <a href="?status=completed" class="btn btn-outline-info {% if status_filter == 'completed' %}active{% endif %}">
+                <i class="bi bi-check-circle"></i> Завершено
+            </a>
+            <a href="?status=paused" class="btn btn-outline-warning {% if status_filter == 'paused' %}active{% endif %}">
+                <i class="bi bi-pause-circle"></i> На паузе
+            </a>
+            <a href="?status=planning" class="btn btn-outline-secondary {% if status_filter == 'planning' %}active{% endif %}">
+                <i class="bi bi-bookmark"></i> В планах
+            </a>
+            <a href="?status=dropped" class="btn btn-outline-danger {% if status_filter == 'dropped' %}active{% endif %}">
+                <i class="bi bi-x-circle"></i> Брошено
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Сериалы -->
+<div class="row">
+    {% for plan in viewing_plans %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            {% if plan.series.poster_url %}
+            <img src="{{ plan.series.poster_url }}" class="card-img-top" alt="{{ plan.series.title }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                <i class="bi bi-film" style="font-size: 3rem; color: white;"></i>
+            </div>
+            {% endif %}
+            
+            <div class="card-body">
+                <h5 class="card-title">{{ plan.series.title }}</h5>
+                
+                <p class="card-text small mb-2">
+                    <span class="badge 
+                        {% if plan.status == 'watching' %}bg-success
+                        {% elif plan.status == 'completed' %}bg-info
+                        {% elif plan.status == 'paused' %}bg-warning text-dark
+                        {% elif plan.status == 'planning' %}bg-secondary
+                        {% else %}bg-danger{% endif %}">
+                        {{ plan.get_status_display }}
+                    </span>
+                </p>
+                
+                <!-- Прогресс -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <small class="text-muted">Прогресс:</small>
+                        <small class="fw-bold">{{ plan.get_progress_percentage }}%</small>
+                    </div>
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ plan.get_progress_percentage }}%" 
+                             aria-valuenow="{{ plan.get_progress_percentage }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {{ plan.get_episodes_watched }}/{{ plan.series.total_episodes }} эпизодов
+                    </small>
+                </div>
+                
+                <p class="card-text small">
+                    <i class="bi bi-tv"></i> {{ plan.episodes_per_day }} эп/день
+                    <br>
+                    <i class="bi bi-hourglass-split"></i> Осталось: {{ plan.calculate_remaining_episodes }} эпизодов
+                    <br>
+                    <i class="bi bi-calendar-check"></i> Завершение: {{ plan.estimated_completion_date|date:"d.m.Y" }}
+                </p>
+                
+                <div class="d-flex gap-2">
+                    <a href="{% url 'series_detail' plan.series.id %}" class="btn btn-primary btn-sm flex-fill">
+                        <i class="bi bi-eye"></i> Открыть
+                    </a>
+                    <a href="{% url 'remove_from_list' plan.id %}" class="btn btn-danger btn-sm" 
+                       onclick="return confirm('Удалить сериал из списка?')">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i> У вас пока нет сериалов в списке. 
+            <br>
+            <a href="{% url 'home' %}" class="btn btn-primary mt-3">
+                <i class="bi bi-plus-circle"></i> Добавить первый сериал
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

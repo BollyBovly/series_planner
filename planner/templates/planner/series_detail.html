@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ series.title }} - SeriesPlanner{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        {% if series.poster_url %}
+        <img src="{{ series.poster_url }}" class="img-fluid rounded poster-img" alt="{{ series.title }}">
+        {% else %}
+        <div class="bg-secondary rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+            <i class="bi bi-film" style="font-size: 5rem; color: white;"></i>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-8">
+        <h1 class="display-4">{{ series.title }}</h1>
+        
+        <p class="lead">
+            {% if series.genres %}
+                <span class="badge bg-primary">{{ series.genres }}</span>
+            {% endif %}
+            {% if series.release_year %}
+                <span class="badge bg-secondary">{{ series.release_year }}</span>
+            {% endif %}
+            {% if series.rating %}
+                <span class="badge bg-warning text-dark">
+                    <i class="bi bi-star-fill"></i> {{ series.rating|floatformat:1 }}
+                </span>
+            {% endif %}
+        </p>
+        
+        <p>{{ series.description|default:"Описание отсутствует." }}</p>
+        
+        <hr>
+        
+        <p>
+            <strong><i class="bi bi-collection"></i> Сезоны:</strong> {{ series.total_seasons }}<br>
+            <strong><i class="bi bi-film"></i> Эпизоды:</strong> {{ series.total_episodes }}<br>
+            <strong><i class="bi bi-clock"></i> Длительность эпизода:</strong> ~{{ series.average_episode_duration }} мин<br>
+            <strong><i class="bi bi-hourglass-split"></i> Общее время:</strong> {{ series.get_total_duration_hours }} часов
+        </p>
+        
+        <hr>
+        
+        {% if user.is_authenticated %}
+            {% if user_plan %}
+            <!-- Уже в списке -->
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle"></i> Сериал в вашем списке
+                <span class="badge bg-success">{{ user_plan.get_status_display }}</span>
+            </div>
+            
+            <!-- Форма обновления прогресса -->
+            <form method="post" action="{% url 'update_progress' user_plan.id %}" class="mb-3">
+                {% csrf_token %}
+                <h5 class="mb-3"><i class="bi bi-pencil"></i> Обновить прогресс просмотра</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label"><strong>Статус просмотра</strong></label>
+                        <select name="status" class="form-select">
+                            <option value="watching" {% if user_plan.status == 'watching' %}selected{% endif %}>Смотрю</option>
+                            <option value="completed" {% if user_plan.status == 'completed' %}selected{% endif %}>Завершено</option>
+                            <option value="paused" {% if user_plan.status == 'paused' %}selected{% endif %}>На паузе</option>
+                            <option value="planning" {% if user_plan.status == 'planning' %}selected{% endif %}>В планах</option>
+                            <option value="dropped" {% if user_plan.status == 'dropped' %}selected{% endif %}>Брошено</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            <strong><i class="bi bi-tv"></i> Сколько эпизодов в день смотрите?</strong>
+                        </label>
+                        <input type="number" name="episodes_per_day" class="form-control" 
+                               value="{{ user_plan.episodes_per_day }}" min="1" max="20" required>
+                        <small class="text-muted">Обычно 1-3 эпизода в день</small>
+                    </div>
+                </div>
+                
+                <div class="row g-3 mt-2">
+                    <div class="col-md-6">
+                        <label class="form-label"><strong>Последний просмотренный сезон</strong></label>
+                        <input type="number" name="last_season" class="form-control" 
+                               value="{{ user_plan.last_season_watched }}" min="0" max="{{ series.total_seasons }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><strong>Последний просмотренный эпизод</strong></label>
+                        <input type="number" name="last_episode" class="form-control" 
+                               value="{{ user_plan.last_episode_watched }}" min="0">
+                    </div>
+                </div>
+                
+                <!-- Расчет времени -->
+                <div class="alert alert-info mt-3">
+                    <h6><i class="bi bi-calculator"></i> Автоматический расчет:</h6>
+                    <ul class="mb-0">
+                        <li>Просмотрено: <strong>{{ user_plan.get_episodes_watched }} эпизодов</strong></li>
+                        <li>Осталось: <strong>{{ user_plan.calculate_remaining_episodes }} эпизодов</strong></li>
+                        <li>По {{ user_plan.episodes_per_day }} эп/день → закончите за <strong>{{ user_plan.calculate_completion_days }} дней</strong></li>
+                        <li>Ожидаемая дата завершения: <strong>{{ user_plan.estimated_completion_date|date:"d.m.Y" }}</strong></li>
+                    </ul>
+                </div>
+                
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> Обновить прогресс
+                </button>
+            </form>
+            
+            <!-- Прогресс-бар -->
+            <div class="mb-3">
+                <h5><i class="bi bi-bar-chart"></i> Прогресс просмотра</h5>
+                <div class="progress" style="height: 30px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ user_plan.get_progress_percentage }}%" 
+                         aria-valuenow="{{ user_plan.get_progress_percentage }}" 
+                         aria-valuemin="0" aria-valuemax="100">
+                        {{ user_plan.get_progress_percentage }}%
+                    </div>
+                </div>
+                <p class="mt-2">
+                    <i class="bi bi-check2-circle"></i> {{ user_plan.get_episodes_watched }}/{{ series.total_episodes }} эпизодов просмотрено
+                    <br>
+                    <i class="bi bi-hourglass-split"></i> Осталось: {{ user_plan.calculate_remaining_episodes }} эпизодов
+                </p>
+            </div>
+            
+            {% else %}
+            <!-- Добавить в список -->
+            <a href="{% url 'add_to_list' series.id %}" class="btn btn-success btn-lg">
+                <i class="bi bi-plus-circle"></i> Добавить в мой список
+            </a>
+            {% endif %}
+            
+            <!-- Рейтинг -->
+            <hr>
+            <h5><i class="bi bi-star"></i> Моя оценка</h5>
+            <form method="post" action="{% url 'rate_series' series.id %}" class="mb-3">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Оценка (1-10)</label>
+                        <input type="number" name="rating" class="form-control" 
+                               value="{% if user_rating %}{{ user_rating.rating }}{% else %}5{% endif %}" 
+                               min="1" max="10" required>
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label">Отзыв (необязательно)</label>
+                        <textarea name="review" class="form-control" rows="2">{% if user_rating %}{{ user_rating.review }}{% endif %}</textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-warning mt-2">
+                    <i class="bi bi-star-fill"></i> Оценить
+                </button>
+            </form>
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> 
+                <a href="{% url 'login' %}" class="alert-link">Войдите</a> или 
+                <a href="{% url 'register' %}" class="alert-link">зарегистрируйтесь</a>, 
+                чтобы добавить сериал в список.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

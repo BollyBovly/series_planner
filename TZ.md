@@ -2,7 +2,7 @@
 
 1. Цель проекта
 
-Создание веб-сервиса для интеллектуального планирования просмотра телесериалов. Система позволяет пользователям:
+Создание веб-сервиса для интеллектуального планирования просмотра сериалов. Система позволяет пользователям:
 
     * Добавлять сериалы в личный список
 
@@ -74,3 +74,35 @@
 Информация о каждом эпизоде.
 
     * series (ForeignKey на Series) – св
+
+    * season_number (IntegerField) – номер сезона
+
+    * episode_number (IntegerField) – номер эпизода в сезоне
+
+    * title (CharField) – название эпизода
+
+    * duration (IntegerField) – длительность в минутах
+
+Модель 3: WatchingHistory (История просмотров)
+
+Логирование активности для аналитики.
+
+Ключевые поля:
+
+    * user (ForeignKey на User) – пользователь
+
+    * series (ForeignKey на Series) – сериал
+
+    * episode (ForeignKey на Episode) – эпизод (опционально)
+
+    * watched_at (DateTimeField) – дата и время просмотра
+
+    * duration_watched (IntegerField) – длительность просмотра в минутах
+
+4. Технический стек
+
+    * Backend: Django 5.1.2
+
+    * База данных: PostgreSQL (production), SQLite (development)
+
+    * Frontend: Bootstrap 5.3.2, Bootstrap Icons 1.11.3
